@@ -9,9 +9,8 @@ use std::any::Any;
 
 impl Server {
     pub fn run(self, max_threads: u8, mut logger: Logger) -> Result<(), Box<dyn std::error::Error>>{
-        // Create Arc thread
+        // self Arc
         let running = Arc::new(AtomicBool::new(true));
-        // Clone arc for movement
         let running_clone = Arc::clone(&running);
         // logger Arc
         let logger = Arc::new(Mutex::new(logger));
@@ -22,10 +21,15 @@ impl Server {
                 logger.info("Server shutting down...");
             }
             running_clone.store(false, Ordering::SeqCst);
+        }).map_err(|e| {
+            if let Ok(mut logger) = logger.lock() {
+                logger.error(&format!("Failed to set Ctrl+C handler: {}", e));
+            }
+            format!("Failed to set Ctrl+C handler: {}", e)
         })?;
         // Server start message
         if let Ok(mut logger) = logger.lock() {
-            logger.info("Server started...");
+            logger.info(&format!("Server started with {} max_threads", max_threads));
         }
         // Main loop
         while running.load(Ordering::SeqCst) {
@@ -33,7 +37,7 @@ impl Server {
         }
         // Server stop  message
         if let Ok(mut logger) = logger.lock() {
-            logger.info("Server stopped...");
+            logger.info("Server stopped");
         }
         // Return
         Ok(())

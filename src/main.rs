@@ -14,5 +14,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (server, monitor) = pre_build(name, host, port)?;
     logger.info(&format!("\n{}", server));
     logger.info(&format!("\n{}", monitor));
+    server.run(1, logger);
     Ok(())
 }

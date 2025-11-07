@@ -2,7 +2,7 @@ use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use chrono::Utc;
+use chrono::{Utc, Local, FixedOffset};
 
 pub enum LogLevel {
     Info,
@@ -23,7 +23,8 @@ impl LogLevel {
 }
 
 pub struct Logger {
-    log_file: PathBuf
+    log_file: PathBuf,
+    offset: FixedOffset
 }
 
 impl Logger {
@@ -35,7 +36,10 @@ impl Logger {
             }
         }
         let _file = OpenOptions::new().create(true).write(true).append(true).open(&final_log_file)?;
-        Ok(Logger { log_file: final_log_file })
+        Ok(Logger {
+            log_file: final_log_file,
+            offset: *Local::now().offset()
+        })
     }
 
     pub fn log_file_path(&self) -> &Path {
@@ -64,7 +68,8 @@ impl Logger {
 
     fn write_with_level(&mut self, level: LogLevel, message: &str) -> io::Result<()> {
         let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S");
-        let formatted_message = format!("[{}] [{}] {}", timestamp, level.as_str(), message);
+        // fix
+        let formatted_message = format!("[{}{}] [{}] {}", timestamp, self.offset, level.as_str(), message);
         match level {
             LogLevel::Error => eprintln!("{}", formatted_message),
             _ => println!("{}", formatted_message),

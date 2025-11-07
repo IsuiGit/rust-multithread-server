@@ -16,6 +16,7 @@ impl Server {
         let logger = Arc::new(Mutex::new(logger));
         let logger_clone = Arc::clone(&logger);
         // Ctrl+C handler
+        // ----------------------------------------------------------------------------------------
         ctrlc::set_handler(move || {
             if let Ok(mut logger) = logger_clone.lock() {
                 logger.info("Server shutting down...");
@@ -25,8 +26,12 @@ impl Server {
             if let Ok(mut logger) = logger.lock() {
                 logger.error(&format!("Failed to set Ctrl+C handler: {}", e));
             }
-            format!("Failed to set Ctrl+C handler: {}", e)
+            Box::new(e) as Box<dyn std::error::Error>
         })?;
+        if let Ok(mut logger) = logger.lock() {
+            logger.info("The server stop handler has been successfully registered.\n\tYou can now stop the server by pressing Ctrl+C.");
+        }
+        //-----------------------------------------------------------------------------------------
         // Server start message
         if let Ok(mut logger) = logger.lock() {
             logger.info(&format!("Server started with {} max_threads", max_threads));

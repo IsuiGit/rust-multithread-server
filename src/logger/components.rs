@@ -63,7 +63,11 @@ impl Logger {
     }
 
     pub fn debug(&mut self, message: &str) -> io::Result<()> {
-        self.write_with_level(LogLevel::Debug, message)
+        if cfg!(debug_assertions) {
+           self.write_with_level(LogLevel::Debug, message)
+       } else {
+           Ok(())
+       }
     }
 
     fn write_with_level(&mut self, level: LogLevel, message: &str) -> io::Result<()> {

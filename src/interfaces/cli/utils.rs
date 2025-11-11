@@ -11,12 +11,15 @@ struct Args {
     /// Port
     #[arg(long)]
     port: u16,
+    // Max threads
+    #[arg(long, default_value = "8")]
+    max_threads: u8,
     /// Log file path (optional, defaults to "app.log")
     #[arg(long, default_value = "app.log")]
     log_file_path: String,
 }
 
-pub fn parse() -> Result<(String, [u8; 4], u16, String), String> {
+pub fn parse() -> Result<(String, [u8; 4], u16, u8, String), String> {
     // Load parser
     let _args = Args::parse();
     // Get host as string
@@ -40,6 +43,6 @@ pub fn parse() -> Result<(String, [u8; 4], u16, String), String> {
             Err(_) => return Err(format!("Uncorrect part of host: {}", part))
         }
     }
-    // return octets vec and port
-    Ok((_args.name, octets, _args.port, _args.log_file_path))
+    // return paser result
+    Ok((_args.name, octets, _args.port, _args.max_threads, _args.log_file_path))
 }

@@ -46,9 +46,6 @@ impl Server{
         reader.read_to_end(&mut buffer)?;
         Ok(buffer)
     }
-
-    // for outcomming TcpStreams
-    fn response() {}
 }
 
 impl fmt::Display for Server {
